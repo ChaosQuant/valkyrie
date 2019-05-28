@@ -1,0 +1,52 @@
+## 施密特正交化
+columns = ['standardize_ROEAfterNonRecurring', 'standardize_CHV', 'standardize_IVR',
+           'standardize_CFinc2','standardize_CFinc1']
+factors_schimiddt = factors_sets.set_index('trade_date').loc['2010-01-08'][columns]
+class_mkt = factors_schimiddt[['standardize_CFinc2','standardize_CFinc1']]
+factors1 = factors_schimiddt[['standardize_ROEAfterNonRecurring','standardize_CHV',
+                             'standardize_IVR']]
+col_name = factors1.columns
+factors1 = factors1.values
+R = np.zeros((factors1.shape[1], factors1.shape[1]))
+Q = np.zeros(factors1.shape)
+for k in range(0, factors1.shape[1]):
+    R[k, k] = np.sqrt(np.dot(factors1[:, k], factors1[:, k]))
+    Q[:, k] = factors1[:, k]/R[k, k]
+    for j in range(k+1, factors1.shape[1]):
+        R[k, j] = np.dot(Q[:, k], factors1[:, j])
+        factors1[:, j] = factors1[:, j] - R[k, j]*Q[:, k]
+Q = pd.DataFrame(Q,columns = col_name,index = factors_schimiddt.index)
+Q = pd.concat([Q,class_mkt],axis = 1)
+
+
+## 规范正交化
+columns = ['standardize_ROEAfterNonRecurring', 'standardize_CHV', 'standardize_IVR',
+           'standardize_CFinc2','standardize_CFinc1']
+factors_symmetry = factors_sets.set_index('trade_date').loc['2010-01-08'][columns]
+class_mkt = factors_canonial[['standardize_CFinc2','standardize_CFinc1']]
+factors1 = factors_canonial[['standardize_ROEAfterNonRecurring','standardize_CHV',
+                             'standardize_IVR']]
+col_name = factors1.columns
+D,U=np.linalg.eig(np.dot(factors1.T,factors1))
+S = np.dot(U,np.diag(D**(-0.5)))
+Fhat = np.dot(factors1,S)
+Fhat = np.dot(Fhat,U.T)
+Fhat = pd.DataFrame(Fhat,columns = col_name,index = factors_symmetry.index)
+Fhat = pd.concat([Fhat,class_mkt],axis = 1)
+type(Fhat)
+
+## 对称正交化
+columns = ['standardize_ROEAfterNonRecurring', 'standardize_CHV', 'standardize_IVR',
+           'standardize_CFinc2','standardize_CFinc1']
+factors_symmetry = factors_sets.set_index('trade_date').loc['2010-01-08'][columns]
+class_mkt = factors_canonial[['standardize_CFinc2','standardize_CFinc1']]
+factors1 = factors_canonial[['standardize_ROEAfterNonRecurring','standardize_CHV',
+                             'standardize_IVR']]
+col_name = factors1.columns
+D,U=np.linalg.eig(np.dot(factors1.T,factors1))
+S = np.dot(U,np.diag(D**(-0.5)))
+Fhat = np.dot(factors1,S)
+Fhat = np.dot(Fhat,U.T)
+Fhat = pd.DataFrame(Fhat,columns = col_name,index = factors_symmetry.index)
+Fhat = pd.concat([Fhat,class_mkt],axis = 1)
+Fhat
